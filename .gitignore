@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Django
+*.sqlite3
+.env
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
