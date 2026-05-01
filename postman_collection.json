@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "Products Microservice",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "HTML Page",
+      "item": [
+        {
+          "name": "All products",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8000/"
+          }
+        },
+        {
+          "name": "Search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:8000/?search=phone",
+              "host": ["127.0.0.1"],
+              "port": "8000",
+              "path": ["/"],
+              "query": [{ "key": "search", "value": "phone" }]
+            }
+          }
+        },
+        {
+          "name": "Paginate",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:8000/?page=2",
+              "host": ["127.0.0.1"],
+              "port": "8000",
+              "path": ["/"],
+              "query": [{ "key": "page", "value": "2" }]
+            }
+          }
+        },
+        {
+          "name": "Search + paginate + custom size",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:8000/?search=laptop&page=2&limit=5",
+              "host": ["127.0.0.1"],
+              "port": "8000",
+              "path": ["/"],
+              "query": [
+                { "key": "search", "value": "laptop" },
+                { "key": "page", "value": "2" },
+                { "key": "limit", "value": "5" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "JSON API",
+      "item": [
+        {
+          "name": "All products",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8000/api/products/"
+          }
+        },
+        {
+          "name": "Search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/?search=phone",
+              "host": ["127.0.0.1"],
+              "port": "8000",
+              "path": ["api", "products", ""],
+              "query": [{ "key": "search", "value": "phone" }]
+            }
+          }
+        },
+        {
+          "name": "Custom page size",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/?limit=5",
+              "host": ["127.0.0.1"],
+              "port": "8000",
+              "path": ["api", "products", ""],
+              "query": [{ "key": "limit", "value": "5" }]
+            }
+          }
+        },
+        {
+          "name": "Paginate (page 2)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/?page=2",
+              "host": ["127.0.0.1"],
+              "port": "8000",
+              "path": ["api", "products", ""],
+              "query": [{ "key": "page", "value": "2" }]
+            }
+          }
+        },
+        {
+          "name": "Paginate + custom size",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/?page=2&limit=5",
+              "host": ["127.0.0.1"],
+              "port": "8000",
+              "path": ["api", "products", ""],
+              "query": [
+                { "key": "page", "value": "2" },
+                { "key": "limit", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search + paginate + custom size",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/?search=samsung&page=1&limit=20",
+              "host": ["127.0.0.1"],
+              "port": "8000",
+              "path": ["api", "products", ""],
+              "query": [
+                { "key": "search", "value": "samsung" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Max page size (100)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/?limit=100",
+              "host": ["127.0.0.1"],
+              "port": "8000",
+              "path": ["api", "products", ""],
+              "query": [{ "key": "limit", "value": "100" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
