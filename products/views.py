@@ -70,9 +70,37 @@ class ProductListAPIView(View):
 
 
 class ProductListView(View):
-    """Serves the HTML shell. All data is loaded client-side via ProductListAPIView."""
+    """
+    Server-rendered product catalog.
+
+    Reads query params, calls DummyJSON via ProductsService, and passes the
+    result to the template. The template renders the full HTML table — no
+    client-side fetching, filtering, or pagination.
+    """
 
     template_name = "products/list.html"
 
     def get(self, request):
-        return render(request, self.template_name)
+        page, limit, search = _parse_params(request)
+
+        try:
+            data = _service.get_products(page=page, limit=limit, search=search)
+            error = None
+        except DummyJSONError as exc:
+            logger.warning("Products fetch failed: %s", exc)
+            data = {"products": [], "total": 0, "skip": 0, "limit": limit}
+            error = str(exc)
+
+        total = data["total"]
+        pagination = _build_pagination(page, limit, total)
+
+        context = {
+            "products": data["products"],
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "search": search,
+            "error": error,
+            **pagination,
+        }
+        return render(request, self.template_name, context)

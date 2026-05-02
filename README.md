@@ -7,6 +7,8 @@ A full-stack product catalog application that fetches data from the [DummyJSON](
 
 Both implementations share the same approach: all calls to the DummyJSON API are made **server-side**; the browser only ever talks to your own server.
 
+> **Architecture note:** To comply with the assignment requirements, all API calls, search, and pagination are handled on the backend. JavaScript is used only for the gallery toggle interaction and does not fetch, filter, paginate, or render product data.
+
 ---
 
 ## Features
