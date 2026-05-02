@@ -78,7 +78,7 @@ class ProductListView(View):
     client-side fetching, filtering, or pagination.
     """
 
-    template_name = "products/list.html"
+    template_name = "products/product_list.html"
 
     def get(self, request):
         page, limit, search = _parse_params(request)

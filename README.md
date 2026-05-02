@@ -1,23 +1,24 @@
 # Products Catalog
 
-A full-stack product catalog application that fetches data from the [DummyJSON](https://dummyjson.com) public API. It is delivered in two independent forms:
+A product catalog application that proxies the [DummyJSON](https://dummyjson.com) public API.
+Delivered in two independent forms:
 
-1. **Django microservice** — a Python backend with a JSON REST API and a server-served HTML shell driven by vanilla JavaScript.
-2. **WordPress plugin** — a self-contained PHP plugin that mirrors all features via WordPress AJAX.
+1. **Django microservice** — Python backend that renders the full HTML page server-side.
+2. **WordPress plugin** — Self-contained PHP plugin with the same features via WordPress AJAX.
 
-Both implementations share the same approach: all calls to the DummyJSON API are made **server-side**; the browser only ever talks to your own server.
-
-> **Architecture note:** To comply with the assignment requirements, all API calls, search, and pagination are handled on the backend. JavaScript is used only for the gallery toggle interaction and does not fetch, filter, paginate, or render product data.
+> **Architecture:** All API calls, search, and pagination are handled on the backend.
+> JavaScript is used **only** for the gallery toggle (show/hide a pre-rendered row).
+> It does not fetch, filter, paginate, or render any product data.
 
 ---
 
 ## Features
 
-- Paginated product table (Title, Description, Price, Rating, Stock, Brand, Category, Thumbnail)
-- Live search — filters results via the DummyJSON search endpoint
-- Gallery toggle — clicking "Gallery" opens an inline image strip between rows (up to 3 images, no extra network request)
-- Graceful error handling — network failures surface as a banner, never a broken page
-- No frontend framework — 100 % vanilla JavaScript
+- Server-rendered product table (Thumbnail, Title, Description, Price, Rating, Stock, Brand, Category)
+- Search — form `GET` submission, handled entirely by the backend
+- Pagination — plain anchor links, page computed by the backend
+- Gallery toggle — clicking "Gallery" reveals a hidden row with up to 3 product images (pre-rendered, no extra request)
+- Graceful error handling — DummyJSON failures show a banner instead of crashing
 
 ---
 
@@ -27,13 +28,13 @@ Both implementations share the same approach: all calls to the DummyJSON API are
 
 | Tool | Version |
 |------|---------|
-| Python | 3.11 + |
+| Python | 3.11+ |
 | [uv](https://github.com/astral-sh/uv) (recommended) or pip | any |
 
 ### Installation
 
 ```bash
-# 1. Clone / enter the project directory
+# 1. Enter the project directory
 cd pythonProject
 
 # 2. Create a virtual environment and install dependencies
@@ -42,13 +43,13 @@ uv pip install -r requirements.txt
 
 # — or with plain pip —
 python -m venv .venv
-.venv\Scripts\activate          # Windows
+.venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 ```
 
 ### Configuration
 
-Copy `.env.example` to `.env` and adjust if needed (defaults work out of the box):
+Copy `.env.example` to `.env` (defaults work out of the box for local dev):
 
 ```
 DEBUG=True
@@ -68,15 +69,63 @@ python manage.py runserver
 
 Open **http://127.0.0.1:8000/** in your browser.
 
+---
+
+### Project Structure
+
+```
+pythonProject/
+│
+├── manage.py                       Django CLI entry point (start server, run checks, etc.)
+├── requirements.txt                Python dependencies (Django, requests)
+├── .env.example                    Template for environment variables
+├── postman_collection.json         Ready-to-import Postman collection for the JSON API
+│
+├── config/                         Django project configuration package
+│   ├── settings.py                 All settings: installed apps, middleware, DummyJSON config
+│   ├── urls.py                     Root URL router — delegates everything to products/urls.py
+│   └── wsgi.py                     WSGI entry point used by production servers (gunicorn, etc.)
+│
+└── products/                       The single Django app — all product logic lives here
+    │
+    ├── services.py                 DummyJSON API client
+    │                               Builds the correct URL (search vs. browse), sends the
+    │                               HTTP request, handles timeouts and errors, returns JSON.
+    │
+    ├── views.py                    Two views:
+    │                               • ProductListView — reads query params, calls services.py,
+    │                                 passes data to the template, returns full HTML page.
+    │                               • ProductListAPIView — same logic but returns raw JSON
+    │                                 (used by the Postman collection).
+    │
+    ├── urls.py                     Maps URLs to views:
+    │                               • /               → ProductListView
+    │                               • /api/products/  → ProductListAPIView
+    │
+    ├── apps.py                     Registers the app with Django (required boilerplate)
+    │
+    └── templates/
+        └── products/
+            ├── base.html           Shared page layout: header, container, and all CSS styles
+            └── product_list.html   The product page:
+                                    • Search form (method="GET")
+                                    • Server-rendered <table> with one row per product
+                                    • Hidden gallery <tr> after each row (toggled by JS)
+                                    • Pagination links (plain <a> tags with backend-generated URLs)
+                                    • 8-line gallery toggle script (the only JS in the project)
+```
+
+---
+
 ### API Endpoints
 
 | Method | URL | Description |
 |--------|-----|-------------|
-| GET | `/` | HTML product catalog page |
-| GET | `/api/products/` | JSON — all products |
-| GET | `/api/products/?search=phone` | JSON — filtered |
-| GET | `/api/products/?page=2&limit=5` | JSON — paginated |
-| GET | `/api/products/?search=apple&page=1&limit=20` | JSON — combined |
+| `GET` | `/` | Server-rendered HTML catalog page |
+| `GET` | `/api/products/` | JSON — all products |
+| `GET` | `/api/products/?search=phone` | JSON — keyword search |
+| `GET` | `/api/products/?page=2&limit=5` | JSON — paginated |
+| `GET` | `/api/products/?search=apple&page=1&limit=20` | JSON — combined |
 
 **Query parameters**
 
@@ -91,34 +140,12 @@ Open **http://127.0.0.1:8000/** in your browser.
 ```json
 {
   "products":    [ { "id": 1, "title": "...", ... } ],
-  "total":       100,
+  "total":       194,
   "skip":        0,
   "limit":       10,
   "page":        1,
-  "total_pages": 10
+  "total_pages": 20
 }
-```
-
-### Project Structure
-
-```
-pythonProject/
-├── manage.py
-├── requirements.txt
-├── .env.example
-├── config/
-│   ├── settings.py       environment-driven configuration
-│   ├── urls.py
-│   └── wsgi.py
-└── products/
-    ├── services.py       DummyJSON API client + DummyJSONError
-    ├── views.py          ProductListView (HTML shell) + ProductListAPIView (JSON)
-    ├── urls.py
-    ├── templatetags/
-    │   └── product_filters.py   tojson custom filter
-    └── templates/products/
-        ├── base.html     shared layout + CSS
-        └── list.html     HTML shell + vanilla JS application
 ```
 
 ---
@@ -127,74 +154,88 @@ pythonProject/
 
 ### Installation
 
-1. Copy the `wordpress-plugin/products-catalog/` folder into your WordPress installation:
+1. Copy `wordpress-plugin/products-catalog/` into your WordPress installation:
    ```
    wp-content/plugins/products-catalog/
    ```
-2. Log in to **WP Admin → Plugins** and activate **Products Catalog**.
-3. On activation the plugin automatically creates a page titled **"Compare Assignment"** with the `[products_catalog]` shortcode in its content.
-4. Visit that page in your browser — the catalog renders immediately.
+2. Go to **WP Admin → Plugins** and activate **Products Catalog**.
+3. The plugin automatically creates a page titled **"Compare Assignment"** containing `[products_catalog]`.
+4. Visit that page — the catalog renders immediately.
 
-You can also add `[products_catalog]` to any other page or post.
+You can also place `[products_catalog]` on any other page or post.
+
+---
 
 ### Plugin Structure
 
 ```
-products-catalog/
-├── products-catalog.php           main plugin file; registers hooks
-├── includes/
-│   ├── class-activator.php        creates the "Compare Assignment" page on activation
-│   ├── class-api.php              WordPress AJAX handler — proxies DummyJSON calls
-│   └── class-shortcode.php        registers [products_catalog] shortcode; enqueues assets
-└── assets/
-    ├── css/products-catalog.css   scoped styles (prefix: pc-)
-    └── js/products-catalog.js     vanilla JS — identical logic to Django frontend
-```
-
-### How it works
-
-```
-Browser                  WordPress (PHP)              DummyJSON
-  |                           |                           |
-  | GET /wp-admin/admin-ajax  |                           |
-  |   ?action=products_catalog_fetch&page=1&search=phone  |
-  |-------------------------> |                           |
-  |                           | GET /products/search?q=phone
-  |                           |-------------------------> |
-  |                           | <------------------------ |
-  |  { success: true, data: { products, total, ... } }    |
-  | <------------------------ |                           |
-  | renders table via JS      |                           |
+wordpress-plugin/
+└── products-catalog/
+    │
+    ├── products-catalog.php        Main plugin file — declares the plugin to WordPress,
+    │                               loads all classes, and registers activation + AJAX hooks.
+    │
+    ├── includes/
+    │   ├── class-activator.php     Runs once on plugin activation.
+    │                               Creates the "Compare Assignment" page (idempotent —
+    │                               safe to re-activate without creating duplicates).
+    │
+    │   ├── class-api.php           WordPress AJAX handler (/wp-admin/admin-ajax.php).
+    │                               Reads page/limit/search params, calls DummyJSON from PHP,
+    │                               and returns a JSON response to the browser.
+    │
+    │   └── class-shortcode.php     Registers the [products_catalog] shortcode.
+    │                               Outputs the HTML shell and enqueues the CSS + JS assets.
+    │
+    └── assets/
+        ├── css/products-catalog.css   All styles scoped under #products-catalog-app
+        │                              (pc- prefix avoids conflicts with theme styles).
+        └── js/products-catalog.js     Gallery-toggle script — identical behaviour to the
+                                       Django version. Reads config injected by
+                                       wp_localize_script (AJAX URL + action name).
 ```
 
 ---
 
 ## How the Application Works
 
-### Data flow (Django)
+### Request flow (Django)
 
 ```
-Browser → GET /api/products/?page=1&search=phone
-            ↓
-        ProductListAPIView._parse_params()
-            ↓
-        ProductsService.get_products()   ← calls DummyJSON
-            ↓
-        JSON response → Browser
-            ↓
-        vanilla JS renders table, pagination, gallery
+1. Browser sends:  GET /?search=phone&page=2
+
+2. ProductListView reads query params → calls ProductsService.get_products()
+
+3. ProductsService sends:  GET https://dummyjson.com/products/search?q=phone&limit=10&skip=10
+
+4. DummyJSON responds with matching products
+
+5. Django renders product_list.html with the product data
+   • Every product row is written to HTML on the server
+   • The gallery <tr> (hidden) is written right after each product row
+
+6. Browser receives the complete, fully-rendered HTML page
+
+7. User searches / paginates → browser sends a new GET request → repeat from step 1
 ```
 
-### Gallery
+### Gallery (the only JS)
 
-When the user clicks "Gallery," the JavaScript reads the `data-images` attribute that was embedded in the table row during rendering. It creates a `<tr class="gallery-row">` immediately after the clicked row and appends up to 3 `<img>` elements. No additional network request is made. Clicking the button again removes the gallery row.
+The gallery `<tr>` for each product is already in the HTML when the page loads — hidden with the `hidden` attribute. Clicking "Gallery" only flips that attribute. No network request is made.
 
-### Search & Pagination
-
-Both are handled by the backend:
-- **Search** forwards the `q` parameter to `GET /products/search` on DummyJSON.
-- **Pagination** converts `page` + `limit` to `skip` = `(page − 1) × limit` for DummyJSON.
-- The JavaScript sends a new fetch on every search submit or page link click, replaces the table body, and re-renders the pagination controls.
+```javascript
+// The entire JavaScript in this project:
+document.addEventListener('click', function (e) {
+  var button = e.target.closest('.btn-gallery');
+  if (!button) return;
+  var galleryRow = document.getElementById(button.dataset.galleryId);
+  if (!galleryRow) return;
+  var opening = galleryRow.hidden;
+  galleryRow.hidden  = !opening;
+  button.textContent = opening ? 'Close Gallery' : 'Gallery';
+  button.setAttribute('aria-expanded', String(opening));
+});
+```
 
 ---
 
@@ -202,11 +243,11 @@ Both are handled by the backend:
 
 | Decision | Reason |
 |----------|--------|
-| No database | This is a pure proxy — all data lives in DummyJSON. Adding a DB would add complexity with no benefit. |
-| `uv` for Python env | Fast, single-binary, no system Python conflict. Falls back to standard `pip + venv`. |
-| Vanilla JS only | Requirement. An IIFE module pattern keeps the global namespace clean. |
-| Event delegation for gallery | One listener on `<tbody>` handles all gallery buttons, including rows added dynamically on page change. |
-| `esc()` helper | Manually replaces `& < > "` instead of relying on `element.textContent` so the result is safe inside both text nodes *and* attribute values in template literals. |
+| No database | Pure proxy — all data lives in DummyJSON. A DB would add complexity with no benefit. |
+| Server-side rendering | Assignment requirement. Search and pagination are standard HTML form/link GET requests. |
+| `uv` for Python env | Fast, single-binary tool. Falls back to standard `pip + venv`. |
+| `urlencode` on search in pagination links | Prevents broken URLs when the search query contains spaces or special characters. |
+| Gallery rows pre-rendered and hidden | Keeps JS minimal — no fetch, no DOM construction from data. |
 | WordPress CSS prefix `pc-` | Avoids collisions with theme or other plugin styles. |
-| WordPress AJAX (no REST API) | `admin-ajax.php` works on every WordPress install without additional routing configuration. |
-| Page created idempotently | The activator checks for an existing "Compare Assignment" page before inserting, so deactivating and re-activating does not duplicate it. |
+| WordPress AJAX over REST API | `admin-ajax.php` works on every WordPress install without extra configuration. |
+| Page creation is idempotent | Activator checks for an existing "Compare Assignment" page before inserting. |
