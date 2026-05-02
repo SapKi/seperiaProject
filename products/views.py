@@ -4,18 +4,21 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
-from .services import DummyJSONError, ProductsService
+from .providers.dummyjson import DummyJSONProvider  # ← swap this line to change source
+from .services import ProductServiceError, ProductsService
 
 logger = logging.getLogger(__name__)
 
-_service = ProductsService()
+# To use a different data source, replace DummyJSONProvider with any class
+# that implements products.providers.base.ProductsProvider.
+_service = ProductsService(provider=DummyJSONProvider())
 
 DEFAULT_PAGE_SIZE = 10
 MAX_PAGE_SIZE = 100
 
 
 def _parse_params(request) -> tuple[int, int, str]:
-    """Return (page, limit, search) extracted and clamped from query params."""
+    """Extract and validate page, limit, and search from query params."""
     try:
         page = max(1, int(request.GET.get("page", 1)))
     except (ValueError, TypeError):
@@ -51,31 +54,28 @@ class ProductListAPIView(View):
         page, limit, search = _parse_params(request)
 
         try:
-            data = _service.get_products(page=page, limit=limit, search=search)
-        except DummyJSONError as exc:
+            result = _service.get_products(page=page, limit=limit, search=search)
+        except ProductServiceError as exc:
             return JsonResponse({"error": str(exc)}, status=503)
 
-        pagination = _build_pagination(page, limit, data["total"])
+        pagination = _build_pagination(page, limit, result.total)
 
-        return JsonResponse(
-            {
-                "products": data["products"],
-                "total": data["total"],
-                "skip": data["skip"],
-                "limit": data["limit"],
-                "page": page,
-                "total_pages": pagination["total_pages"],
-            }
-        )
+        return JsonResponse({
+            "products":    result.products,
+            "total":       result.total,
+            "skip":        result.skip,
+            "limit":       result.limit,
+            "page":        page,
+            "total_pages": pagination["total_pages"],
+        })
 
 
 class ProductListView(View):
     """
     Server-rendered product catalog.
 
-    Reads query params, calls DummyJSON via ProductsService, and passes the
-    result to the template. The template renders the full HTML table — no
-    client-side fetching, filtering, or pagination.
+    Reads query params, delegates to ProductsService, and passes the result
+    to the template. No client-side fetching, filtering, or pagination.
     """
 
     template_name = "products/product_list.html"
@@ -84,23 +84,23 @@ class ProductListView(View):
         page, limit, search = _parse_params(request)
 
         try:
-            data = _service.get_products(page=page, limit=limit, search=search)
+            result = _service.get_products(page=page, limit=limit, search=search)
             error = None
-        except DummyJSONError as exc:
+        except ProductServiceError as exc:
             logger.warning("Products fetch failed: %s", exc)
-            data = {"products": [], "total": 0, "skip": 0, "limit": limit}
+            result = None
             error = str(exc)
 
-        total = data["total"]
+        total = result.total if result else 0
         pagination = _build_pagination(page, limit, total)
 
         context = {
-            "products": data["products"],
-            "total": total,
-            "page": page,
-            "limit": limit,
-            "search": search,
-            "error": error,
+            "products": result.products if result else [],
+            "total":    total,
+            "page":     page,
+            "limit":    limit,
+            "search":   search,
+            "error":    error,
             **pagination,
         }
         return render(request, self.template_name, context)
