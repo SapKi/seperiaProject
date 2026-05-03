@@ -136,14 +136,32 @@
     td { padding: 11px 14px; vertical-align: middle; }
 
     .td-title { font-weight: 600; white-space: nowrap; }
+    .td-desc-wrapper { max-width: 300px; }
     .td-desc {
-      max-width: 220px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
       color: #6b7280;
       font-size: .82rem;
+      line-height: 1.5;
     }
+    .td-desc.desc-expanded {
+      display: block;
+      overflow: visible;
+    }
+    .desc-arrow {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #9ca3af;
+      font-size: .75rem;
+      padding: 2px 0;
+      display: block;
+      margin-top: 2px;
+    }
+    .desc-arrow:hover { color: #4f46e5; }
     .td-price { font-weight: 700; color: #059669; white-space: nowrap; }
     .td-rating { white-space: nowrap; }
     .stars { color: #f59e0b; }

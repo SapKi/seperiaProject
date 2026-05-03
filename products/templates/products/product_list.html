@@ -48,15 +48,15 @@
     <table aria-label="Product list">
       <thead>
         <tr>
-          <th>Thumbnail</th>
-          <th>Title</th>
+          <th></th>
+          <th>Products</th>
+          <th></th>
           <th>Description</th>
           <th>Price</th>
           <th>Rating</th>
           <th>Stock</th>
           <th>Brand</th>
           <th>Category</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -74,9 +74,20 @@
           </td>
           <td class="td-title">{{ product.title }}</td>
           <td>
-            <span class="td-desc" title="{{ product.description }}">
-              {{ product.description }}
-            </span>
+            <button
+              class="btn btn-gallery"
+              data-gallery-id="gallery-{{ product.id }}"
+              aria-expanded="false"
+              aria-controls="gallery-{{ product.id }}"
+            >
+              Open Gallery
+            </button>
+          </td>
+          <td>
+            <div class="td-desc-wrapper">
+              <span class="td-desc" id="desc-{{ product.id }}">{{ product.description }}</span>
+              <button class="desc-arrow" data-desc-id="desc-{{ product.id }}" aria-label="Show full description">&#9660; more</button>
+            </div>
           </td>
           <td class="td-price">${{ product.price }}</td>
           <td class="td-rating">
@@ -93,16 +104,6 @@
           </td>
           <td>{{ product.brand }}</td>
           <td><span class="badge">{{ product.category }}</span></td>
-          <td>
-            <button
-              class="btn btn-gallery"
-              data-gallery-id="gallery-{{ product.id }}"
-              aria-expanded="false"
-              aria-controls="gallery-{{ product.id }}"
-            >
-              Gallery
-            </button>
-          </td>
         </tr>
 
         <tr id="gallery-{{ product.id }}" class="gallery-row" hidden>
@@ -181,16 +182,27 @@
    * flipping its `hidden` attribute. No data is fetched or rendered by JS.
    */
   document.addEventListener('click', function (e) {
-    var button = e.target.closest('.btn-gallery');
-    if (!button) return;
 
-    var galleryRow = document.getElementById(button.dataset.galleryId);
-    if (!galleryRow) return;
-    var opening    = galleryRow.hidden;
+    // Gallery toggle
+    var galleryBtn = e.target.closest('.btn-gallery');
+    if (galleryBtn) {
+      var galleryRow = document.getElementById(galleryBtn.dataset.galleryId);
+      if (!galleryRow) return;
+      var opening = galleryRow.hidden;
+      galleryRow.hidden  = !opening;
+      galleryBtn.textContent = opening ? 'Close Gallery' : 'Open Gallery';
+      galleryBtn.setAttribute('aria-expanded', String(opening));
+    }
 
-    galleryRow.hidden  = !opening;
-    button.textContent = opening ? 'Close Gallery' : 'Gallery';
-    button.setAttribute('aria-expanded', String(opening));
+    // Description expand/collapse
+    var descArrow = e.target.closest('.desc-arrow');
+    if (descArrow) {
+      var desc     = document.getElementById(descArrow.dataset.descId);
+      if (!desc) return;
+      var expanded = desc.classList.toggle('desc-expanded');
+      descArrow.innerHTML  = expanded ? '&#9650; less' : '&#9660; more';
+    }
+
   });
 </script>
 {% endblock %}
