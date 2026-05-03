@@ -35,8 +35,9 @@ Delivered in two independent forms:
 ### Installation
 
 ```bash
-# 1. Enter the project directory
-cd pythonProject
+# 1. Clone and enter the project directory
+git clone https://github.com/SapKi/seperiaProject.git
+cd seperiaProject
 
 # 2. Create a virtual environment and install dependencies
 uv venv .venv
@@ -305,7 +306,7 @@ document.addEventListener('click', function (e) {
   if (!galleryRow) return;
   var opening = galleryRow.hidden;
   galleryRow.hidden  = !opening;
-  button.textContent = opening ? 'Close Gallery' : 'Gallery';
+  button.textContent = opening ? 'Close Gallery' : 'Open Gallery';
   button.setAttribute('aria-expanded', String(opening));
 });
 ```
