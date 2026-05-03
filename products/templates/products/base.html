@@ -10,23 +10,23 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f0f2f5;
-      color: #1a1a2e;
+      background: #faf5ef;
+      color: #4a2515;
       min-height: 100vh;
     }
 
     /* ── Page header ────────────────────────────────────── */
     .page-header {
-      background: #1a1a2e;
-      color: #ffffff;
+      background: #744f44;
+      color: #fdf8f3;
       padding: 18px 32px;
       display: flex;
       align-items: center;
       gap: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      box-shadow: 0 1px 4px rgba(0,0,0,.12);
     }
     .page-header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: .4px; }
-    .page-header .subtitle { font-size: .85rem; color: #a0aec0; margin-top: 2px; }
+    .page-header .subtitle { font-size: .85rem; color: #d4a98a; margin-top: 2px; }
 
     /* ── Layout container ───────────────────────────────── */
     .container { max-width: 1500px; margin: 0 auto; padding: 28px 24px; }
@@ -58,8 +58,8 @@
     }
     .search-form input[type="text"]:focus {
       outline: none;
-      border-color: #4f46e5;
-      box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+      border-color: #0ea5e9;
+      box-shadow: 0 0 0 3px rgba(14,165,233,.18);
     }
     .btn {
       padding: 9px 18px;
@@ -72,15 +72,15 @@
       white-space: nowrap;
     }
     .btn:hover { filter: brightness(1.08); }
-    .btn-primary  { background: #4f46e5; color: #fff; }
-    .btn-secondary { background: #e5e7eb; color: #374151; }
+    .btn-primary  { background: #0ea5e9; color: #fff; }
+    .btn-secondary { background: #ede8e3; color: #744f44; }
     .btn-gallery  {
-      background: #7c3aed;
+      background: #b08070;
       color: #fff;
       padding: 5px 12px;
       font-size: .8rem;
     }
-    .btn-gallery.open { background: #6b21a8; }
+    .btn-gallery.open { background: #8c6055; }
 
     .meta-info {
       margin-left: auto;
@@ -115,8 +115,8 @@
     }
 
     thead th {
-      background: #1a1a2e;
-      color: #e2e8f0;
+      background: #744f44;
+      color: #fdf8f3;
       padding: 13px 14px;
       text-align: left;
       font-size: .75rem;
@@ -131,7 +131,7 @@
       transition: background .15s;
     }
     tbody tr.product-row:last-child { border-bottom: none; }
-    tbody tr.product-row:hover { background: #fafafa; }
+    tbody tr.product-row:hover { background: #f5f0ea; }
 
     td { padding: 11px 14px; vertical-align: middle; }
 
@@ -161,14 +161,14 @@
       display: block;
       margin-top: 2px;
     }
-    .desc-arrow:hover { color: #4f46e5; }
-    .td-price { font-weight: 700; color: #059669; white-space: nowrap; }
+    .desc-arrow:hover { color: #0ea5e9; }
+    .td-price { font-weight: 700; color: #744f44; white-space: nowrap; }
     .td-rating { white-space: nowrap; }
-    .stars { color: #f59e0b; }
+    .stars { color: #d4a240; }
     .td-stock { white-space: nowrap; }
-    .stock-low  { color: #dc2626; font-weight: 600; }
-    .stock-mid  { color: #d97706; font-weight: 600; }
-    .stock-ok   { color: #059669; }
+    .stock-low  { color: #b91c1c; font-weight: 600; }
+    .stock-mid  { color: #a16207; font-weight: 600; }
+    .stock-ok   { color: #3d6b3d; }
 
     .badge {
       display: inline-block;
@@ -176,8 +176,8 @@
       border-radius: 20px;
       font-size: .75rem;
       font-weight: 500;
-      background: #ede9fe;
-      color: #5b21b6;
+      background: #7dd3fc;
+      color: #0c4a6e;
       white-space: nowrap;
     }
 
@@ -192,9 +192,9 @@
 
     /* ── Gallery inline row ─────────────────────────────── */
     tr.gallery-row td {
-      background: #f5f3ff;
+      background: #e3f3fc;
       padding: 18px 20px;
-      border-bottom: 1px solid #ddd6fe;
+      border-bottom: 1px solid #8dcaee;
     }
     .gallery-strip {
       display: flex;
@@ -246,9 +246,9 @@
     }
     .pagination a:hover { background: #f3f4f6; border-color: #9ca3af; }
     .pagination .current {
-      background: #4f46e5;
+      background: #0ea5e9;
       color: #fff;
-      border-color: #4f46e5;
+      border-color: #0ea5e9;
       font-weight: 600;
     }
     .pagination .disabled { color: #d1d5db; pointer-events: none; }
